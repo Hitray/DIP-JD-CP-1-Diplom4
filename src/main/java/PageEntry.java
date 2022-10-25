@@ -5,6 +5,8 @@ public class PageEntry implements Comparable<PageEntry> {
     private int page;
     private int count;
 
+    public PageEntry() {
+    }
 
     public PageEntry(String pdfName, int page, int count) {
         this.pdfName = pdfName;
@@ -12,57 +14,57 @@ public class PageEntry implements Comparable<PageEntry> {
         this.count = count;
     }
 
-    public PageEntry() {
-
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof PageEntry)) {
-            return false;
-        }
-        try {
-            PageEntry pageEntry = (PageEntry) obj;
-            return pageEntry.getPdfName().equals(pdfName) &&
-                    pageEntry.getCount() == count;
-        } catch (ClassCastException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(pdfName, count);
-    }
-
-    @Override
-    public int compareTo(PageEntry p) {
-        if (count < p.getCount()) {
-            return 1;
-        } else if (count > p.getCount()) {
-            return -1;
-        }
-        return pdfName.compareTo(p.pdfName);
-    }
-
     public String getPdfName() {
         return pdfName;
+    }
+
+    public int getPage() {
+        return page;
     }
 
     public int getCount() {
         return count;
     }
 
+
     @Override
     public String toString() {
-        return "PageEntry{" +
-                "pdfName='" + pdfName + '\'' +
-                ", page=" + page +
-                ", count=" + count +
-                '}';
+        return "\nPageEntry {\n " +
+                "pdfName = '" + pdfName + '\'' +
+                ",\n page = " + page +
+                ",\n count = " + count +
+                "\n}";
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PageEntry)) return false;
+        PageEntry pageEntry = (PageEntry) o;
+        return getPage() == pageEntry.getPage() && getCount() == pageEntry.getCount() && Objects.equals(getPdfName(), pageEntry.getPdfName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getPdfName(), getPage(), getCount());
+    }
+
+
+    @Override
+    public int compareTo(PageEntry o) {
+        if (count < o.count) {
+            return 1;
+        } else if (count > o.count) {
+            return -1;
+        } else {
+            if (page < o.page) {
+                return 1;
+            } else if (page > o.page) {
+                return -1;
+            } else {
+                return getPdfName().compareTo(o.getPdfName());
+            }
+        }
     }
 }
