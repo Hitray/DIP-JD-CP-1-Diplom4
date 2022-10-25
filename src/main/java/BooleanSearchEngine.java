@@ -28,14 +28,14 @@ public class BooleanSearchEngine implements SearchEngine {
 
                 Map<String, Integer> freqs = new HashMap<>(); // список слов с частотой каждого слова, слова уникальны (HashMap)
 
-                //  -- подсчет частоты слов
+                
                 for (var word : allWordsOnPage) {
                     if (word.isEmpty()) {
                         continue;
                     }
                     freqs.put(word.toLowerCase(), freqs.getOrDefault(word.toLowerCase(), 0) + 1);
                 }
-                // -- добавление в Map<String, List<PageEntry>> words пары из "слово-в-нижнем-регистре" : "список-страниц-где-встречается-слово"
+                
                 int count = 0;
                 for (var word : freqs.keySet()) {
                     String wordToLowerCase = word.toLowerCase();
@@ -51,7 +51,7 @@ public class BooleanSearchEngine implements SearchEngine {
 
     @Override
     public List<PageEntry> search(String word) {
-        // реализация поиска по слову
+       
         List<PageEntry> result = new ArrayList<>(); // пустой список результатов
         String wordToLowerCase = word.toLowerCase(); // перевод слова в нижний регистр
         if (words.get(wordToLowerCase) != null) { // если слово есть в базе слов
@@ -59,8 +59,8 @@ public class BooleanSearchEngine implements SearchEngine {
                 result.add(pageEntry); // добавляем результат поиска в список результатов
             }
         }
-        Collections.sort(result); // сортируем как умеем :)
-        return result; // возвращаем результат
+        Collections.sort(result); 
+        return result;
     }
 
     @Override
