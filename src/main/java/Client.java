@@ -21,8 +21,7 @@ public class Client {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
         ) {
-            //out.println("{\"word\": \"Бизнес\"}");
-            //System.out.println(jsonToList(in.readLine()));
+            
             out.println("{\"word\": \"DevOps\"}");
             System.out.println(jsonToList(in.readLine()));
         }
