@@ -3,7 +3,7 @@ import java.net.Socket;
 
 public class Client {
     public static void main(String[] args) {
-        String host = "eedenisov";
+        String host = "Hitray";
 
         try (Socket client = new Socket(host, Main.PORT);
              BufferedReader in = new BufferedReader(
