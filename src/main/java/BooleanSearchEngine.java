@@ -7,59 +7,79 @@ import java.io.IOException;
 import java.util.*;
 
 public class BooleanSearchEngine implements SearchEngine {
-    private final Map<String, List<PageEntry>> allWords;
+
+    private Map<String, List<PageEntry>> words;
 
     public BooleanSearchEngine(File pdfsDir) throws IOException {
 
-        allWords = new HashMap<>();
-        Map<String, Integer> wordAndCount = new HashMap<>();
+        List<File> listOfPDFFiles = List.of(Objects.requireNonNull(pdfsDir.listFiles())); // список всех PDF-файлов
 
-        List<File> listOfPDFFiles = List.of(Objects.requireNonNull(pdfsDir.listFiles()));
-        for (File filePdf : listOfPDFFiles) {
-            var doc = new PdfDocument(new PdfReader(filePdf));
+        words = new HashMap<>();
 
-            for (var numberPage = 1; numberPage <= doc.getNumberOfPages(); numberPage++) {
-                var text = PdfTextExtractor.getTextFromPage(doc.getPage(numberPage));
-                var words = text.split("\\P{IsAlphabetic}+");
+        for (File pdf : listOfPDFFiles) { // перебираем все PDF-файлы
 
-                for (var word : words) {
+            var doc = new PdfDocument(new PdfReader(pdf)); // создаем PDF-объект из каждого PDF-файла
+
+            for (int i = 0; i < doc.getNumberOfPages(); i++) { // перебираем все страницы в каждом PDF-объекте
+
+                var textOfOnePage = PdfTextExtractor.getTextFromPage(doc.getPage(i + 1)); // текст каждой страницы
+
+                var allWordsOnPage = textOfOnePage.split("\\P{IsAlphabetic}+"); // делим текст на слова
+
+                Map<String, Integer> freqs = new HashMap<>(); // список слов с частотой каждого слова, слова уникальны (HashMap)
+
+                //  -- подсчет частоты слов
+                for (var word : allWordsOnPage) {
                     if (word.isEmpty()) {
                         continue;
                     }
-                    wordAndCount.put(word.toLowerCase(), wordAndCount.getOrDefault(
-                            word.toLowerCase(), 0) + 1);
+                    freqs.put(word.toLowerCase(), freqs.getOrDefault(word.toLowerCase(), 0) + 1);
                 }
-                int count;
-                for (var w : wordAndCount.keySet()) {
-                    String wordToLowerCase = w.toLowerCase();
-                    if (wordAndCount.get(wordToLowerCase) != null) {
-                        count = wordAndCount.get(wordToLowerCase);
-                        allWords.computeIfAbsent(wordToLowerCase, k -> new ArrayList<>()).add(
-                                new PageEntry(filePdf.getName(), numberPage, count));
+                // -- добавление в Map<String, List<PageEntry>> words пары из "слово-в-нижнем-регистре" : "список-страниц-где-встречается-слово"
+                int count = 0;
+                for (var word : freqs.keySet()) {
+                    String wordToLowerCase = word.toLowerCase();
+                    if (freqs.get(wordToLowerCase) != null) {
+                        count = freqs.get(wordToLowerCase);
+                        words.computeIfAbsent(wordToLowerCase, k -> new ArrayList<>()).add(new PageEntry(pdf.getName(), i + 1, count));
                     }
                 }
-                wordAndCount.clear();
+                freqs.clear(); // чистим список слов с частотой каждого слова, тк. для следующей страницы он создается заново
             }
         }
     }
 
     @Override
     public List<PageEntry> search(String word) {
-        List<PageEntry> resultSearch = new ArrayList<>();
-        String wordToLowerCase = word.toLowerCase();
-        if (allWords.get(wordToLowerCase) != null) {
-            for (PageEntry pageEntry : allWords.get(wordToLowerCase)) {
-                resultSearch.add(pageEntry);
+        // реализация поиска по слову
+        List<PageEntry> result = new ArrayList<>(); // пустой список результатов
+        String wordToLowerCase = word.toLowerCase(); // перевод слова в нижний регистр
+        if (words.get(wordToLowerCase) != null) { // если слово есть в базе слов
+            for (PageEntry pageEntry : words.get(wordToLowerCase)) { // перебираем результаты поиска
+                result.add(pageEntry); // добавляем результат поиска в список результатов
             }
         }
-        Collections.sort(resultSearch);
-        return resultSearch;
+        Collections.sort(result); // сортируем как умеем :)
+        return result; // возвращаем результат
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BooleanSearchEngine)) return false;
+        BooleanSearchEngine that = (BooleanSearchEngine) o;
+        return Objects.equals(words, that.words);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(words);
     }
 
     @Override
     public String toString() {
         return "BooleanSearchEngine{" +
-                "allWords=" + allWords +
+                "words=" + words +
                 '}';
     }
 }
